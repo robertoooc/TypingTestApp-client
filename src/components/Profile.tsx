@@ -42,7 +42,7 @@ const Profile:FC<Props> = ({currentUser})=>{
     const deleteAccount = async()=>{
         try{
             const token = localStorage.getItem('jwt')
-            const changePassword = await axios.delete('http://localhost:8000/users',{   
+            const changePassword = await axios.delete(`${process.env.REACT_APP_SERVER_URL}/users`,{   
                 headers: {
                   'Authorization': `${token}`
                 }
@@ -59,7 +59,7 @@ const Profile:FC<Props> = ({currentUser})=>{
     const handleSubmit=async()=>{
         try{
             const token = localStorage.getItem('jwt')
-            const changePassword = await axios.put('http://localhost:8000/users',{
+            const changePassword = await axios.put(`${process.env.REACT_APP_SERVER_URL}/users`,{
                 oldPassword:oldPassword,
                 newPassword:newPassword
             },{   
@@ -76,7 +76,7 @@ const Profile:FC<Props> = ({currentUser})=>{
         try{
             const token = localStorage.getItem('jwt')
             console.log(token)
-            const specifcTest = await axios.get(`http://localhost:8000/tests/${id}`,{   
+            const specifcTest = await axios.get(`${process.env.REACT_APP_SERVER_URL}/tests/${id}`,{   
                 headers: {
                   'Authorization': `${token}`
                 }
@@ -94,7 +94,7 @@ const Profile:FC<Props> = ({currentUser})=>{
         const getUserTests=async()=>{
             try{
                 const token = localStorage.getItem('jwt')
-                const pingBackend = await axios.get('http://localhost:8000/users',{   
+                const pingBackend = await axios.get(`${process.env.REACT_APP_SERVER_URL}/users`,{   
                         headers: {
                           'Authorization': `${token}`
                         }

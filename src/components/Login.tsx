@@ -28,7 +28,7 @@ interface Props {
                 password
             }
             const submit
-            = await axios.post('http://localhost:8000/users/login', reqBody)      
+            = await axios.post(`${process.env.REACT_APP_SERVER_URL}/users/login`, reqBody)      
             const {token} = submit.data
             localStorage.setItem('jwt',token)
             const decoded = jwt_decode<currentUser>(token)

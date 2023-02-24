@@ -76,7 +76,7 @@ const Home:FC<Props>=({currentUser,token})=>{
                     mistakes: container,
                     accuracy: accuracy
                 }
-                const sendData = await axios.post('http://localhost:8000/tests',payload,{
+                const sendData = await axios.post(`${process.env.REACT_APP_SERVER_URL}/tests`,payload,{
                     headers: {
                         'Authorization': `${token}`
                     }

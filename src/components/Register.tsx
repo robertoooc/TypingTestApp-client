@@ -27,7 +27,7 @@ const Register:FC<Props> = ({currentUser,setCurrentUser})=>{
                 email,
                 password
             }
-            const submit = await axios.post('http://localhost:8000/users/register', reqBody)
+            const submit = await axios.post(`${process.env.REACT_APP_SERVER_URL}/users/register`, reqBody)
 
             const {token} = submit.data
             localStorage.setItem('jwt',token)
