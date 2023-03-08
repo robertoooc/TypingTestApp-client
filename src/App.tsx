@@ -5,9 +5,10 @@ import './App.css'
 import NavBar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
-import Home from './components/Home';
+import Test from './components/Test';
 import Profile from './components/Profile';
 import TestAnalytics from './components/TestAnalytics';
+import Home from './components/Home';
 const App:FC=()=> {
   interface user {
   name?: string;
@@ -25,7 +26,7 @@ const App:FC=()=> {
 
 
   return (
-    <div className='flex flex-row bg-neutral-100 h-screen w-screen h-full w-full overflow-hidden'>
+    <div className='flex flex-row bg-neutral-100 h-screen w-screen overflow-hidden'>
     <BrowserRouter >
 
       <NavBar
@@ -36,7 +37,8 @@ const App:FC=()=> {
 
 
       <Routes>
-        <Route path='/test/:id' element={<Home 
+        <Route path='/' element={<Home/>}/>
+        <Route path='/test/:id' element={<Test 
         currentUser={currentUser}
         token = {token}
         />}/>

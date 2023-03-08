@@ -213,44 +213,44 @@ let viewData2
 }
 
     let display1,display2
-    if(test1!=null){
-        display1 = (
-            <div className="bg-zinc-700">
-                <p>Test 1</p>
-                <p>Date: {test1.date}</p>
+    // if(test1!=null){
+    //     display1 = (
+    //         <div className="bg-zinc-700">
+    //             <p>Test 1</p>
+    //             <p>Date: {test1.date}</p>
                 
-            </div>
-        )
-    }else{
-        display1=(
-            <div>
-                no show
-            </div>
-        )
-    }
-    if(test2!=null){
-        display2=(
-            <div>
-                show
-            </div>
-        )
-    }else{
-        display2=(
-            <div>
-                no show
-            </div>
-        )
-    }
+    //         </div>
+    //     )
+    // }else{
+    //     display1=(
+    //         <div>
+    //             no show
+    //         </div>
+    //     )
+    // }
+    // if(test2!=null){
+    //     display2=(
+    //         <div>
+    //             show
+    //         </div>
+    //     )
+    // }else{
+    //     display2=(
+    //         <div>
+    //             no show
+    //         </div>
+    //     )
+    // }
 
-    let displaySelectedTests = (
-        <div>
-            <p className="text-center">Selected Tests</p>
-            <div className="flex place-content-center space-x-5">
-                {display1}
-                {display2}
-            </div>
-        </div>
-    )
+    // let displaySelectedTests = (
+    //     <div>
+    //         <p className="text-center">Selected Tests</p>
+    //         <div className="flex place-content-center space-x-5">
+    //             {display1}
+    //             {display2}
+    //         </div>
+    //     </div>
+    // )
     return(
         <div>
             <br></br>
@@ -270,7 +270,7 @@ let viewData2
                     </div>
                 </div>
             </div>
-            {displaySelectedTests}
+            {/* {displaySelectedTests} */}
             <div className="flex place-content-evenly">
                 <div>
                     <div className="flex">
