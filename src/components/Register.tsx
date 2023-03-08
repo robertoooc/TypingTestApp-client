@@ -32,7 +32,6 @@ const Register:FC<Props> = ({currentUser,setCurrentUser})=>{
             const {token} = submit.data
             localStorage.setItem('jwt',token)
             const decoded = jwt_decode<currentUser>(token)
-            console.log(decoded,'🐥')
             setCurrentUser(decoded)
             navigate('/profile')
         }catch(err:any){

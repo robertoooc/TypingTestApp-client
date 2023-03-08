@@ -67,25 +67,22 @@ const Profile:FC<Props> = ({currentUser})=>{
                   'Authorization': `${token}`
                 }
         })
-        console.log(changePassword.data)
         }catch(err){
             console.log(err)
         }
     }
-    const getTestAnalytics = async(id:string)=>{
-        try{
-            const token = localStorage.getItem('jwt')
-            console.log(token)
-            const specifcTest = await axios.get(`${process.env.REACT_APP_SERVER_URL}/tests/${id}`,{   
-                headers: {
-                  'Authorization': `${token}`
-                }
-        })
-        console.log(specifcTest.data)
-        }catch(err){
-            console.log(err)
-        }
-    }
+    // const getTestAnalytics = async(id:string)=>{
+    //     try{
+    //         const token = localStorage.getItem('jwt')
+    //         const specifcTest = await axios.get(`${process.env.REACT_APP_SERVER_URL}/tests/${id}`,{   
+    //             headers: {
+    //               'Authorization': `${token}`
+    //             }
+    //     })
+    //     }catch(err){
+    //         console.log(err)
+    //     }
+    // }
 
     useEffect(()=>{
         if(!localStorage.getItem('jwt')){
@@ -105,7 +102,6 @@ const Profile:FC<Props> = ({currentUser})=>{
                     wpm: pingBackend.data.wpm
                 }
                 setUserInfo(structureUserInfo)
-                console.log(pingBackend.data)
             }catch(err){
                 console.log(err)
             }
@@ -185,10 +181,9 @@ const Profile:FC<Props> = ({currentUser})=>{
                 </div>
                 )
             } 
-            console.log(test.accuracy)
             return(
 
-            <div key={`${test._id}`} className='flex place-content-around items-center my-1 bg-stone-200 rounded-lg' onClick={()=>getTestAnalytics(test._id)}>
+            <div key={`${test._id}`} className='flex place-content-around items-center my-1 bg-stone-200 rounded-lg'>
                 <div className="">
                     <p className="font-sans text-base">{test.wpm}</p>
                 </div>

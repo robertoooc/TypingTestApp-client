@@ -59,8 +59,6 @@ const TestAnalytics:FC<Props> =({userData})=>{
 
 
         const handleTest1=(wpm:number,mistakeAmount:number,accuracy:number,test:test)=>{
-            // console.log(wpm)
-            // setTest1Clicked(true)
             setTest1Wpm(wpm)
             setTest1Accuracy(accuracy)
             setTest1MistakeAmount(mistakeAmount)
@@ -75,7 +73,6 @@ const TestAnalytics:FC<Props> =({userData})=>{
             setTest2(test)
         }
         const handleCompare=()=>{
-            console.log('test')
             let wpmPercentage, wpmDifference, mistakeAmountPercentage,mistakeAmountDifference, accuracyDifference,accuracyPercentage
             if(test1Wpm==test2Wpm){
                 wpmPercentage = 0
@@ -106,8 +103,6 @@ const TestAnalytics:FC<Props> =({userData})=>{
             setMistakePercentage(mistakeAmountPercentage)
             setAccuracyDifference(accuracyDifference)
             setAccuracyPercentage(accuracyPercentage)
-            console.log(typeof(mistakeAmountPercentage))
-            console.log(mistakeAmountPercentage,mistakeAmountDifference)
         }
 
         useEffect(()=>{

@@ -68,7 +68,6 @@ const Test:FC<Props>=({currentUser,token})=>{
             setSeeResults(true)
             let mistakeAmount=container.map(mistake => mistake.amount).reduce((prev, next) => prev + next)
             if(token){
-                console.log(parseFloat(((index/(index+mistakeAmount))*100).toFixed(2)))
                 const accuracy = parseFloat(((index/(index+mistakeAmount))*100).toFixed(2))
                 const payload={
                     id: currentUser?._id,
@@ -81,7 +80,6 @@ const Test:FC<Props>=({currentUser,token})=>{
                         'Authorization': `${token}`
                     }
                 })
-                console.log(sendData.data)
             }
                 
             if(container.length==0){
@@ -142,7 +140,6 @@ const Test:FC<Props>=({currentUser,token})=>{
                     }
                 })
                 document.addEventListener('keyup',(e)=>{
-                    // console.log(e.key)
                     if(e.key== ' '){
                         document.getElementById('space')?.classList.remove('bg-zinc-800')
                     }else{
