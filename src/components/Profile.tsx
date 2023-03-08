@@ -246,7 +246,7 @@ const Profile:FC<Props> = ({currentUser})=>{
     return(
         <div className="mx-auto">
         {displayUserInfo}
-        <button onClick={()=>setShowAnalytics(!showAnalytics)}>Analytics</button>
+        <button onClick={()=>setShowAnalytics(!showAnalytics)}className=' bg-zinc-800 rounded-lg text-white p-2 font-medium m-2 '>Analytics</button>
         {/* {seeSettings? edit:<div className="flex m-6"><GrUserSettings onClick={()=>setSeeSettings(true)} className='text-xl '/></div>} */}
         {displayAnalytics}
         </div>
