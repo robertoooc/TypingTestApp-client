@@ -1,73 +1,63 @@
-import {FC, useState, useEffect} from 'react';
-import jwt_decode from 'jwt-decode'
-import {BrowserRouter,Routes,Route} from 'react-router-dom'
-import './App.css'
+import { FC, useState, useEffect } from 'react';
+import jwt_decode from 'jwt-decode';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './App.css';
 import NavBar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
-import Test from './components/Test';
+import Test from './components/Test/Test';
 import Profile from './components/Profile';
 import TestAnalytics from './components/TestAnalytics';
 import Home from './components/Home';
-const App:FC=()=> {
+const App: FC = () => {
   interface user {
-  name?: string;
-  email?: string;
-  _id?: string;
-  iat?: number
+    name?: string;
+    email?: string;
+    _id?: string;
+    iat?: number;
   }
-  let [currentUser,setCurrentUser]= useState<user|null>(null)
-  const [token, setToken] = useState<string|null>(null)
-  useEffect(()=>{
-    const token:string|null = localStorage.getItem('jwt')
-    setToken(token)
-    token ? setCurrentUser(jwt_decode(token)): setCurrentUser(null)
-  },[])
-
+  let [currentUser, setCurrentUser] = useState<user | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => {
+    const token: string | null = localStorage.getItem('jwt');
+    setToken(token);
+    token ? setCurrentUser(jwt_decode(token)) : setCurrentUser(null);
+  }, []);
 
   return (
     <div className='flex flex-row bg-neutral-100 h-screen w-screen overflow-hidden'>
-    <BrowserRouter >
+      <BrowserRouter>
+        <NavBar currentUser={currentUser} setCurrentUser={setCurrentUser} />
 
-      <NavBar
-         currentUser= {currentUser}
-         setCurrentUser={setCurrentUser}
-         />
-
-
-
-      <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/test/:id' element={<Test 
-        currentUser={currentUser}
-        token = {token}
-        />}/>
-        <Route 
-        path='/register' 
-        element={
-          <Register 
-          currentUser={currentUser} 
-          setCurrentUser={setCurrentUser}
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route
+            path='/test/:id'
+            element={<Test currentUser={currentUser} token={token} />}
           />
-        }/>
-        <Route
-          path='/login'
-          element={
-            <Login
-            currentUser= {currentUser}
-            setCurrentUser={setCurrentUser}
-            />
-          }
-          />
-        <Route
-          path='/profile'
-          element={
-            <Profile
-              currentUser={currentUser}
+          <Route
+            path='/register'
+            element={
+              <Register
+                currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
               />
             }
-            />
-        {/* <Route
+          />
+          <Route
+            path='/login'
+            element={
+              <Login
+                currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
+              />
+            }
+          />
+          <Route
+            path='/profile'
+            element={<Profile currentUser={currentUser} />}
+          />
+          {/* <Route
           path='/test-analytics'
           element={
             <TestAnalytics
@@ -75,11 +65,10 @@ const App:FC=()=> {
             />
           }
         /> */}
-
-      </Routes>
-    </BrowserRouter>
-            </div>
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
-}
+};
 
 export default App;

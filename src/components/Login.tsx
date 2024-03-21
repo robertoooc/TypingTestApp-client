@@ -1,13 +1,10 @@
 import { FC, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import {
-  Router,
-  Routes,
-  Route,
   useNavigate,
   NavigateFunction,
 } from "react-router-dom";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { currentUser } from "./types/types";
 
 interface Props {
