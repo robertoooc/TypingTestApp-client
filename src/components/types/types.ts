@@ -27,8 +27,12 @@ export interface test {
 export interface accountInfo {
   name: string;
   wpm: number;
+  email: string;
 }
 export interface results {
   wpm: number;
   mistakes: mistakes[];
+  accuracy: number;
+  _id : string | undefined;
+  totalChars: number;
 }
