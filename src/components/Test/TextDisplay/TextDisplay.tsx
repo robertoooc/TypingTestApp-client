@@ -5,7 +5,9 @@ interface Props {
   currIdx: number;
   mistakes: mistakeIdxs[];
   started: Boolean;
+  newTest: Boolean;
   setStarted: () => void;
+  setNewTest: () => void;
 }
 
 interface mistakeIdxs {
@@ -19,17 +21,29 @@ const TextDisplay: FC<Props> = ({
   mistakes,
   started,
   setStarted,
+  newTest,
+  setNewTest,
 }) => {
   return (
-    <div className="relative">
-      <div className="bg-neutral-300 w-7/12 mx-auto rounded-xl p-2 relative">
+    <div className='relative'>
+      <div className='bg-neutral-300 w-7/12 mx-auto rounded-xl p-2 relative'>
         {!started && (
-          <div className="absolute inset-0 flex justify-center items-center backdrop-filter backdrop-brightness-50 rounded-lg">
+          <div className='absolute inset-0 flex justify-center items-center backdrop-filter backdrop-brightness-50 rounded-lg'>
             <button
               onClick={() => setStarted()}
-              className="text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center'
             >
               Start
+            </button>
+          </div>
+        )}
+        {newTest && (
+          <div className='absolute inset-0 flex justify-center items-center backdrop-filter backdrop-brightness-50 rounded-lg'>
+            <button
+              onClick={()=>setNewTest()}
+              className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center'
+            >
+              New Test
             </button>
           </div>
         )}
@@ -50,7 +64,7 @@ const TextDisplay: FC<Props> = ({
 
           return (
             <span key={index} className={className}>
-              {char}
+              {char === ' ' ? '⸱' : char}
             </span>
           );
         })}

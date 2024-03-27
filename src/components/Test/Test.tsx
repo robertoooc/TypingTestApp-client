@@ -4,6 +4,8 @@ import { useNavigate, NavigateFunction, useParams } from 'react-router-dom';
 import { currentUser, results } from '../types/types';
 import TypingTestHeader from './Header/TypingTestHeader';
 import TextDisplay from './TextDisplay/TextDisplay';
+import Keyboard from './TextDisplay/KeyboardDisplay';
+import Results from './TextDisplay/Results';
 
 interface Props {
   currentUser: currentUser | null;
@@ -13,6 +15,7 @@ interface mistakeIdxs {
   char: string;
   idx: number;
 }
+type timeDuration = 15 | 30 | 60;
 const Test: FC<Props> = ({ currentUser, token }) => {
   const [words, setWords] = useState<string>('');
   const [index, setIndex] = useState<number>(0);
@@ -25,10 +28,12 @@ const Test: FC<Props> = ({ currentUser, token }) => {
   const [seeResults, setSeeResults] = useState<boolean>(false);
   const [suggestionUrl, setSuggestionUrl] = useState<string>('');
   const [wpm, setWpm] = useState<number>(0);
-  // const [accuracy,setAccuracy]= useState<number>(0)
-  let navigate: NavigateFunction = useNavigate();
+  const [timeDuration, setTimeDuration] = useState<timeDuration>(60);
   let [results, setResults] = useState<results | undefined>();
+
+  const timeDurations: timeDuration[] = [15, 30, 60];
   let { id } = useParams();
+  let navigate: NavigateFunction = useNavigate();
 
   const handleNewTest = () => {
     // resetting the url based on suggested from test results then refreshes
@@ -38,50 +43,61 @@ const Test: FC<Props> = ({ currentUser, token }) => {
 
   const handleSubmit = async (mistakes: mistakeIdxs[]) => {
     try {
-      let findWPM: number;
-      index === 0
-        ? (findWPM = 0)
-        : (findWPM = words.substring(0, index).split(' ').length);
+      let findWPM: number =
+        index === 0
+          ? 0
+          : words.substring(0, index).split(' ').length * (60 / timeDuration);
 
+      // frequency counter mistakes
       let count: any = {};
-      mistakes.forEach((idx) => {
+      mistakes?.forEach((idx) => {
         count[idx.char] = (count[idx.char] || 0) + 1;
       });
 
+      // formatting into array
       let container = [];
       for (const [key, value] of Object.entries<number>(count)) {
         let newEntry = {
-          char: key,
+          char: key === ' ' ? 'space' : key,
           amount: value,
         };
         container.push(newEntry);
       }
-      let token = localStorage.getItem('jwt');
-      const structureResults = {
+
+      // calculate total mistakes
+      let mistakeAmount =
+        container.length > 0
+          ? container
+              ?.map((mistake) => mistake.amount)
+              ?.reduce((prev, next) => prev + next)
+          : 0;
+
+      let calculatedAccuracy = parseFloat(
+        ((index / (index + mistakeAmount)) * 100).toFixed(2)
+      );
+
+      const payload: results = {
         wpm: findWPM,
         mistakes: container,
+        accuracy: calculatedAccuracy, // Use the calculated accuracy here
+        totalChars: index,
+        _id: undefined,
       };
-      setResults(structureResults);
-      setSeeResults(true);
-      let mistakeAmount = container
-        .map((mistake) => mistake.amount)
-        .reduce((prev, next) => prev + next);
-      if (token) {
-        const accuracy = parseFloat(
-          ((index / (index + mistakeAmount)) * 100).toFixed(2)
-        );
-        const payload = {
-          id: currentUser?._id,
-          wpm: findWPM,
-          mistakes: container,
-          accuracy: accuracy,
-        };
-        await axios.post(`${process.env.REACT_APP_SERVER_URL}/tests`, payload, {
+
+      let token = localStorage.getItem('jwt');
+
+      const res = await axios.post(
+        `${process.env.REACT_APP_SERVER_URL}/tests`,
+        payload,
+        {
           headers: {
             Authorization: `${token}`,
           },
-        });
-      }
+        }
+      );
+      payload._id = res.data.newTest._id as string;
+      setResults(payload);
+      setSeeResults(true);
 
       if (container.length === 0) {
         setNewTest(true);
@@ -95,8 +111,8 @@ const Test: FC<Props> = ({ currentUser, token }) => {
         setNewTest(true);
         setSuggestionUrl(`/test/${suggestion.char}`);
       }
-      return 'got it';
     } catch (err) {
+      console.log(err);
       return false;
     }
   };
@@ -105,7 +121,7 @@ const Test: FC<Props> = ({ currentUser, token }) => {
     const pingWords = async () => {
       try {
         if (id?.length === undefined) {
-          id = 'a';
+          id = 'a'; // eslint-disable-line
         } else {
           if (id.length > 1) {
             id = id[0];
@@ -174,11 +190,17 @@ const Test: FC<Props> = ({ currentUser, token }) => {
       } else {
         // if wrong adding to mistakes
         if (userKey.length > 0) {
-          setMistakes([...mistakes, { char: userKey, idx: index }]);
+          const lastMistake = mistakes[mistakes.length - 1];
+          if (lastMistake) {
+            if (lastMistake.idx !== index)
+              setMistakes([...mistakes, { char: words[index], idx: index }]);
+          } else {
+            setMistakes([...mistakes, { char: words[index], idx: index }]);
+          }
         }
       }
     }
-  }, [userKey, started]);// eslint-disable-line
+  }, [userKey, started]); // eslint-disable-line
 
   useEffect(() => {
     if (started) {
@@ -195,168 +217,59 @@ const Test: FC<Props> = ({ currentUser, token }) => {
         clearInterval(seconds);
       };
     }
-  }, [time, started]);// eslint-disable-line
+  }, [time, started]); // eslint-disable-line
 
-  let display;
-  if (seeResults) {
-    let innerDisplay = results?.mistakes.map(
-      (mistake: { char: string; amount: number }) => {
-        return (
-          <div
-            key={`${mistake.char}`}
-            className='flex items-center my-1 bg-stone-200 rounded-lg space-x-4 place-content-around'
-          >
-            <p>character: {mistake.char}</p>
-            <p>amount: {mistake.amount}</p>
-          </div>
-        );
-      }
-    );
-
-    display = (
-      <div className='h-2/6 w-1/3 my-0 mx-auto overflow-y-auto'>
-        <div className=' h-16 bg-neutral-700 items-center rounded-lg'>
-          <p className='font-mono text-lg font-semibold text-white text-center'>
-            WPM: {results?.wpm}{' '}
-          </p>
-          <p className='font-mono text-lg font-semibold text-white text-center'>
-            Mistakes you made:{' '}
-          </p>
-        </div>
-        <div>{innerDisplay}</div>
-      </div>
-    );
-  } else {
-    display = null;
-  }
-
-  // const typedText = words.substring(0, index);
-  // const untypedText = words.substring(index, words.length - 1);
-
-  const keyboard = (
-    <div className='w-8/12 min-h-min mx-auto grid grid-col-4 gap-1'>
-      <div className='grid gap-1 grid-cols-10'>
-        <span className='border-2 border-black rounded-lg text-center' id='q'>
-          q
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='w'>
-          w
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='e'>
-          e
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='r'>
-          r
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='t'>
-          t
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='y'>
-          y
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='u'>
-          u
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='i'>
-          i
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='o'>
-          o
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='p'>
-          p
-        </span>
-      </div>
-
-      <div className='grid gap-1 grid-cols-10'>
-        <span className='border-2 border-black rounded-lg text-center' id='a'>
-          a
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='s'>
-          s
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='d'>
-          d
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='f'>
-          f
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='g'>
-          g
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='h'>
-          h
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='j'>
-          j
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='k'>
-          k
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='l'>
-          l
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id=';'>
-          ;
-        </span>
-      </div>
-
-      <div className='grid gap-1 grid-cols-10'>
-        <span></span>
-        <span className='border-2 border-black rounded-lg text-center' id='z'>
-          z
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='x'>
-          x
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='c'>
-          c
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='v'>
-          v
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='b'>
-          b
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='n'>
-          n
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id='m'>
-          m
-        </span>
-        <span className='border-2 border-black rounded-lg text-center' id=','>
-          ,
-        </span>
-      </div>
-      <div className='grid'>
-        <span
-          className='border-2 border-black rounded-lg text-center'
-          id='space'
-        >
-          space
-        </span>
-      </div>
-    </div>
-  );
   return (
     <div>
       <TypingTestHeader time={time} wpm={wpm} testedChar={words[0]} />
+      {/* <Results /> */}
       <br></br>
-      <div>
-        <TextDisplay words={words} currIdx={index} mistakes={mistakes} started={started} setStarted={()=>setStarted(true)}/>
-        {newTest ? (
-          <button
-            onClick={handleNewTest}
-            className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center  mx-80'
-          >
-            New Test
-          </button>
-        ) : null}
+
+      <div className='relative'>
+        <div className='flex items-center relative mx-auto'>
+          <p className='ml-10'>Set Test Duration:</p>
+          {timeDurations.map((val) => (
+            <div key={val} className='m-4'>
+              <p
+                className={`cursor-pointer ${
+                  timeDuration === val ? 'underline' : ''
+                }`}
+                onClick={
+                  !started
+                    ? () => {
+                        setTime(val);
+                        setTimeDuration(val);
+                      }
+                    : undefined
+                }
+              >
+                {val} seconds
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <TextDisplay
+          words={words}
+          currIdx={index}
+          mistakes={mistakes}
+          started={started}
+          setStarted={() => setStarted(true)}
+          newTest={newTest}
+          setNewTest={handleNewTest}
+        />
       </div>
 
-      {!newTest ? keyboard : null}
+      {!newTest && <Keyboard />}
 
-      {display}
+      {seeResults && (
+        <Results
+          index={index}
+          results={results}
+          timeDuration={timeDuration}
+          currentUser={currentUser}
+        />
+      )}
     </div>
   );
 };

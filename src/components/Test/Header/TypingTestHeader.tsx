@@ -1,4 +1,4 @@
-import { useEffect, FC } from 'react';
+import { FC } from 'react';
 import { TfiTimer } from 'react-icons/tfi';
 interface Props {
   time: number;
