@@ -147,27 +147,40 @@ const Test: FC<Props> = ({ currentUser, token }) => {
   }, []);
 
   useEffect(() => {
+    // Function to handle keydown event
+    const handleKeyDown = (e:any) => {
+      if (e.key === ' ') {
+        setUserKey('space');
+        document.getElementById('space')?.classList.add('bg-zinc-800');
+      } else {
+        setUserKey(e.key);
+        document.getElementById(e.key)?.classList.add('bg-zinc-800');
+      }
+    };
+  
+    // Function to handle keyup event
+    const handleKeyUp = (e:any) => {
+      if (e.key === ' ') {
+        document.getElementById('space')?.classList.remove('bg-zinc-800');
+      } else {
+        document.getElementById(e.key)?.classList.remove('bg-zinc-800');
+      }
+      setUserKey(null);
+    };
+  
+    // Check if we should add event listeners
     if (load && started) {
-      document.addEventListener('keydown', (e) => {
-        // taking in the key pressed
-        if (e.key === ' ') {
-          setUserKey('space');
-          document.getElementById('space')?.classList.add('bg-zinc-800');
-        } else {
-          setUserKey(e.key);
-          document.getElementById(e.key)?.classList.add('bg-zinc-800');
-        }
-      });
-      document.addEventListener('keyup', (e) => {
-        if (e.key === ' ') {
-          document.getElementById('space')?.classList.remove('bg-zinc-800');
-        } else {
-          document.getElementById(e.key)?.classList.remove('bg-zinc-800');
-        }
-        setUserKey(null);
-      });
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
     }
-  }, [load, time, started]);
+  
+    // Cleanup function to help avoid memory leaks
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [load, started]); // Dependencies
+  
 
   useEffect(() => {
     if (userKey != null && started && !newTest) {
