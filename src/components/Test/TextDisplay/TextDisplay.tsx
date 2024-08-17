@@ -1,4 +1,4 @@
-import { FC, useRef, useEffect, useState } from 'react';
+import { FC, useRef, useEffect, useState, useCallback } from 'react';
 import { mistakeIdxs } from '../../../types/types';
 
 interface Props {
@@ -16,7 +16,7 @@ const TextDisplay: FC<Props> = ({ words, currIdx, mistakes, started, setStarted,
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [currentRow, setCurrentRow] = useState(0);
 
-  const splitIntoRows = (text: string, maxLength: number) => {
+  const splitIntoRows = useCallback((text: string, maxLength: number) => {
     const rows: string[] = [];
     let currentLine = '';
 
@@ -38,11 +38,11 @@ const TextDisplay: FC<Props> = ({ words, currIdx, mistakes, started, setStarted,
     }
 
     return rows;
-  };
+  }, []);
 
   const rows = splitIntoRows(words, sizeLimit);
 
-  const calculateGlobalIndices = () => {
+  const calculateGlobalIndices = useCallback(() => {
     const indices: number[] = [];
     let currentIndex = 0;
 
@@ -54,39 +54,44 @@ const TextDisplay: FC<Props> = ({ words, currIdx, mistakes, started, setStarted,
     });
 
     return indices;
-  };
+  }, [rows]);
 
   const globalIndices = calculateGlobalIndices();
 
-  const getCurrentRowIndex = (index: number) => {
-    let accumulatedLength = 0;
+  const getCurrentRowIndex = useCallback(
+    (index: number) => {
+      let accumulatedLength = 0;
 
-    for (let i = 0; i < rows.length; i++) {
-      accumulatedLength += rows[i].length;
-      if (index < accumulatedLength) {
-        return i;
+      for (let i = 0; i < rows.length; i++) {
+        accumulatedLength += rows[i].length;
+        if (index < accumulatedLength) {
+          return i;
+        }
       }
-    }
 
-    return rows.length - 1;
-  };
+      return rows.length - 1;
+    },
+    [rows]
+  );
 
   useEffect(() => {
     const rowIndex = getCurrentRowIndex(currIdx);
     setCurrentRow(rowIndex);
-  }, [currIdx]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currIdx, getCurrentRowIndex]);
 
   useEffect(() => {
     if (currentRow > 2) {
-      if (containerRef.current) {
-        const currentRowElement = containerRef.current.children[currentRow - 2] as HTMLElement;
-        if (currentRowElement) {
-          currentRowElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
+      requestAnimationFrame(() => {
+        if (containerRef.current) {
+          const currentRowElement = containerRef.current.children[currentRow - 2] as HTMLElement;
+          if (currentRowElement) {
+            currentRowElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            });
+          }
         }
-      }
+      });
     }
   }, [currentRow]);
 
@@ -95,14 +100,14 @@ const TextDisplay: FC<Props> = ({ words, currIdx, mistakes, started, setStarted,
       <div className='bg-neutral-300 w-7/12 mx-auto rounded-xl p-2 relative dark:text-black overflow-hidden'>
         {!started && (
           <div className='absolute inset-0 flex justify-center items-center backdrop-filter backdrop-brightness-50 rounded-lg'>
-            <button onClick={() => setStarted()} className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center'>
+            <button onClick={setStarted} className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center'>
               Start
             </button>
           </div>
         )}
         {newTest && (
           <div className='absolute inset-0 flex justify-center items-center backdrop-filter backdrop-brightness-50 rounded-lg'>
-            <button onClick={() => setNewTest()} className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center'>
+            <button onClick={setNewTest} className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center'>
               New Test
             </button>
           </div>
@@ -119,11 +124,11 @@ const TextDisplay: FC<Props> = ({ words, currIdx, mistakes, started, setStarted,
                 let className = 'inline-block px-1 py-1 rounded-md text-xl';
 
                 if (isError && !isCurrent) {
-                  className += ' bg-red-600';
+                  className += ' bg-red-600'; // Background color for errors
                 } else if (isTyped && !isError) {
-                  className += ' bg-gray-200';
+                  className += ' bg-gray-200'; // Background color for already typed text
                 } else if (isCurrent) {
-                  className += ' bg-yellow-300';
+                  className += ' bg-yellow-300'; // Background color for current typing position
                 }
 
                 return (
