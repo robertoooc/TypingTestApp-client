@@ -1,13 +1,12 @@
 import { FC } from 'react';
-import { results, currentUser } from '../../types/types';
+import { results } from '../../../types/types';
 
 interface props {
   index: number;
   results: results | undefined;
   timeDuration: number;
-  currentUser: currentUser | null;
 }
-const Results: FC<props> = ({ index, results, timeDuration, currentUser }) => {
+const Results: FC<props> = ({ index, results, timeDuration }) => {
   return (
     <div className='max-w-xl mx-auto bg-gray-100 rounded-lg shadow-lg p-6'>
       <div className='text-center mb-6'>
@@ -26,11 +25,11 @@ const Results: FC<props> = ({ index, results, timeDuration, currentUser }) => {
         <div className='text-center'>
           <p className='text-lg font-semibold text-gray-800'>Mistakes</p>
           <p className='text-gray-600'>
-            {!results?.mistakes || results.mistakes.length === 0
+            {/* {!results?.mistakes || results.mistakes.length === 0
               ? '0'
               : results?.mistakes
                   ?.map((a) => a.amount)
-                  ?.reduce((a, b) => a + b)}
+                  ?.reduce((a, b) => a + b)} */}
           </p>
         </div>
         <div className='text-center'>
@@ -38,12 +37,10 @@ const Results: FC<props> = ({ index, results, timeDuration, currentUser }) => {
           <p className='text-gray-600'>{timeDuration} seconds</p>
         </div>
       </div>
-      <h3 className='text-xl font-semibold text-gray-800 mb-4'>
-        Mistakes Made
-      </h3>
+      <h3 className='text-xl font-semibold text-gray-800 mb-4'>Mistakes Made</h3>
       <div className='max-h-40 overflow-y-auto'>
         <div className='space-y-4'>
-          {results?.mistakes
+          {/* {results?.mistakes
             .sort((a, b) => b.amount - a.amount)
             .map((mistake, idx) => (
               <div
@@ -53,7 +50,7 @@ const Results: FC<props> = ({ index, results, timeDuration, currentUser }) => {
                 <p className='font-semibold'>{mistake.char}</p>
                 <p className='text-gray-600'>Amount: {mistake.amount}</p>
               </div>
-            ))}
+            ))} */}
         </div>
       </div>
     </div>

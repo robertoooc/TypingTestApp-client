@@ -16,7 +16,7 @@ const AccountSettings: FC<AccountSettingsProps> = ({
   newPassword,
   setNewPassword,
   handleSubmit,
-  deleteAccount,
+  deleteAccount
 }) => {
   return (
     <div className='bg-black rounded-lg p-4 mb-6'>
@@ -29,7 +29,7 @@ const AccountSettings: FC<AccountSettingsProps> = ({
             type='password'
             id='oldPassword'
             value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
+            onChange={e => setOldPassword(e.target.value)}
             autoComplete='off'
             required
             className='rounded-lg text-black'
@@ -44,17 +44,14 @@ const AccountSettings: FC<AccountSettingsProps> = ({
             type='password'
             id='newPassword'
             value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            onChange={e => setNewPassword(e.target.value)}
             autoComplete='off'
             required
             className='rounded-lg text-black'
           />
         </div>
 
-        <button
-          type='submit'
-          className='w-full py-2 bg-gray-800 text-white font-semibold rounded-lg'
-        >
+        <button type='submit' className='w-full py-2 bg-gray-800 text-white font-semibold rounded-lg'>
           Submit
         </button>
       </form>
@@ -62,10 +59,7 @@ const AccountSettings: FC<AccountSettingsProps> = ({
         <span onClick={deleteAccount} className='pl-5 cursor-pointer'>
           Delete Account
         </span>
-        <RiDeleteBin6Line
-          onClick={deleteAccount}
-          className='ml-1 cursor-pointer'
-        />
+        <RiDeleteBin6Line onClick={deleteAccount} className='ml-1 cursor-pointer' />
       </div>
     </div>
   );

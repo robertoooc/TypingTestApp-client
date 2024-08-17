@@ -1,87 +1,87 @@
-import { FC, useEffect, useState } from 'react';
-import {
-  VictoryAxis,
-  VictoryChart,
-  VictoryHistogram,
-  VictoryLine,
-} from 'victory';
-import { userData } from '../types/types';
-import { getAllTests } from './utils/getAllTests';
+// import { FC, useEffect, useState } from 'react';
+// import {
+//   VictoryAxis,
+//   VictoryChart,
+//   VictoryHistogram,
+//   VictoryLine,
+// } from 'victory';
 
-interface Props {
-  userData: userData[];
-}
+// import { getAllTests } from './utils/getAllTests';
 
-const TestAnalytics: FC<Props> = ({ userData }) => {
-  const [allWPM, setAllWPM] = useState<number[]>([]);
-  const [wpmProgression, setWpmProgression] = useState<
-    { x: number; y: number }[]
-  >([]);
-  const [averageWPM, setAverageWPM] = useState<number>(0);
-  const [accuracyData, setAccuracyData] = useState<{ x: string; y: number }[]>(
-    []
-  );
-  const [accuracyProgression, setAccuracyProgression] = useState<
-    { x: number; y: number }[]
-  >([]);
-  const [averageAccuracy, setAverageAccuracy] = useState<number>(0);
+// interface Props {
+//   // userData: userData[];
+// }
 
-  useEffect(() => {
-    const fetchTestsData = async () => {
-      try {
-        // const tests = await getAllTests();
-        const wpmData: number[] = [];
-        const progressionData: { x: number; y: number }[] = [];
-        const accuracyDistribution: { x: string; y: number }[] = [];
-        const accuracyProgressionData: { x: number; y: number }[] = [];
+const TestAnalytics = () => {
+  // const [allWPM, setAllWPM] = useState<number[]>([]);
+  // const [wpmProgression, setWpmProgression] = useState<
+  //   { x: number; y: number }[]
+  // >([]);
+  // const [averageWPM, setAverageWPM] = useState<number>(0);
+  // const [accuracyData, setAccuracyData] = useState<{ x: string; y: number }[]>(
+  //   []
+  // );
+  // const [accuracyProgression, setAccuracyProgression] = useState<
+  //   { x: number; y: number }[]
+  // >([]);
+  // const [averageAccuracy, setAverageAccuracy] = useState<number>(0);
 
-        userData.forEach((test: any, index: number) => {
-          wpmData.push(test.wpm);
-          progressionData.push({ x: index, y: test.wpm });
+  // useEffect(() => {
+  //   const fetchTestsData = async () => {
+  //     try {
+  //       // const tests = await getAllTests();
+  //       const wpmData: number[] = [];
+  //       const progressionData: { x: number; y: number }[] = [];
+  //       const accuracyDistribution: { x: string; y: number }[] = [];
+  //       const accuracyProgressionData: { x: number; y: number }[] = [];
 
-          // Calculate accuracy distribution
-          test.accuracy >= 0 && test.accuracy <= 20
-            ? accuracyDistribution.push({ x: '0-20%', y: 1 })
-            : test.accuracy > 20 && test.accuracy <= 40
-            ? accuracyDistribution.push({ x: '21-40%', y: 1 })
-            : test.accuracy > 40 && test.accuracy <= 60
-            ? accuracyDistribution.push({ x: '41-60%', y: 1 })
-            : test.accuracy > 60 && test.accuracy <= 80
-            ? accuracyDistribution.push({ x: '61-80%', y: 1 })
-            : accuracyDistribution.push({ x: '81-100%', y: 1 });
+  //       userData.forEach((test: any, index: number) => {
+  //         wpmData.push(test.wpm);
+  //         progressionData.push({ x: index, y: test.wpm });
 
-          accuracyProgressionData.push({ x: index, y: test.accuracy });
-        });
+  //         // Calculate accuracy distribution
+  //         test.accuracy >= 0 && test.accuracy <= 20
+  //           ? accuracyDistribution.push({ x: '0-20%', y: 1 })
+  //           : test.accuracy > 20 && test.accuracy <= 40
+  //           ? accuracyDistribution.push({ x: '21-40%', y: 1 })
+  //           : test.accuracy > 40 && test.accuracy <= 60
+  //           ? accuracyDistribution.push({ x: '41-60%', y: 1 })
+  //           : test.accuracy > 60 && test.accuracy <= 80
+  //           ? accuracyDistribution.push({ x: '61-80%', y: 1 })
+  //           : accuracyDistribution.push({ x: '81-100%', y: 1 });
 
-        // Calculate average WPM
-        const avgWPM =
-          wpmData.reduce((acc, curr) => acc + curr, 0) / wpmData.length;
+  //         accuracyProgressionData.push({ x: index, y: test.accuracy });
+  //       });
 
-        // Calculate average accuracy
-        const avgAccuracy =
-          userData.reduce((acc: number, curr: any) => acc + curr.accuracy, 0) /
-          userData.length;
+  //       // Calculate average WPM
+  //       const avgWPM =
+  //         wpmData.reduce((acc, curr) => acc + curr, 0) / wpmData.length;
 
-        setAllWPM(wpmData);
-        setWpmProgression(progressionData);
-        setAverageWPM(avgWPM);
-        setAccuracyData(accuracyDistribution);
-        setAccuracyProgression(accuracyProgressionData);
-        setAverageAccuracy(avgAccuracy);
-      } catch (error) {
-        console.error('Error fetching tests data:', error);
-      }
-    };
+  //       // Calculate average accuracy
+  //       const avgAccuracy =
+  //         userData.reduce((acc: number, curr: any) => acc + curr.accuracy, 0) /
+  //         userData.length;
 
-    if (userData.length > 0) {
-      fetchTestsData();
-    }
-  }, [userData]);
+  //       setAllWPM(wpmData);
+  //       setWpmProgression(progressionData);
+  //       setAverageWPM(avgWPM);
+  //       setAccuracyData(accuracyDistribution);
+  //       setAccuracyProgression(accuracyProgressionData);
+  //       setAverageAccuracy(avgAccuracy);
+  //     } catch (error) {
+  //       console.error('Error fetching tests data:', error);
+  //     }
+  //   };
+
+  //   if (userData.length > 0) {
+  //     fetchTestsData();
+  //   }
+  // }, [userData]);
 
   return (
     <div className='container mx-auto'>
-      <div className='mx-auto pl-10 mb-6 flex flex-wrap'>
-        {/* Histogram showing the user's WPM compared to all other users */}
+      {/* <div className='mx-auto pl-10 mb-6 flex flex-wrap'>
+        
         <div className='mb-8 mx-5' style={{ maxWidth: '400px' }}>
           <h3 className='text-lg font-bold mb-2'>Your WPM Distribution</h3>
           <p className='text-sm mb-2'>
@@ -99,7 +99,7 @@ const TestAnalytics: FC<Props> = ({ userData }) => {
               label='Frequency'
               style={{ axisLabel: { padding: 40 } }}
             />
-            {/* Add a line indicating the user's average WPM */}
+            
             <VictoryLine
               data={[
                 { x: averageWPM, y: 0 },
@@ -122,7 +122,7 @@ const TestAnalytics: FC<Props> = ({ userData }) => {
           </VictoryChart>
         </div>
 
-        {/* Line chart showing the progression of WPM over time */}
+        
         <div className='mb-8 mr-8' style={{ maxWidth: '400px' }}>
           <h3 className='text-lg font-bold mb-2'>WPM Progression</h3>
           <p className='text-sm mb-2'>
@@ -142,7 +142,7 @@ const TestAnalytics: FC<Props> = ({ userData }) => {
           </VictoryChart>
         </div>
 
-        {/* Accuracy Progression Line Chart */}
+       
         <div className='mb-8 mr-8' style={{ maxWidth: '400px' }}>
           <h3 className='text-lg font-bold mb-2'>Accuracy Progression</h3>
           <p className='text-sm mb-2'>
@@ -163,7 +163,7 @@ const TestAnalytics: FC<Props> = ({ userData }) => {
         </div>
       </div>
 
-      {/* Display average WPM and accuracy */}
+      
       <div className='text-center mb-6 mt-16'>
         <h3 className='text-lg font-bold mb-2'>Average Metrics Of All Users</h3>
         <p>
@@ -171,7 +171,7 @@ const TestAnalytics: FC<Props> = ({ userData }) => {
           <br />
           Average Accuracy: {averageAccuracy.toFixed(2)}%
         </p>
-      </div>
+      </div> */}
     </div>
   );
 };

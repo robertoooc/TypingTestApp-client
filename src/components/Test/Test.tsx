@@ -1,35 +1,40 @@
-import { FC, useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, FC } from 'react';
+import { connect } from 'react-redux';
 import { useNavigate, NavigateFunction, useParams } from 'react-router-dom';
-import { currentUser, results } from '../types/types';
-import TypingTestHeader from './Header/TypingTestHeader';
+import { results, mistakeIdxs, intervalWordData, timeDuration, Lesson } from '../../types/types';
+import Header from '../Header';
 import TextDisplay from './TextDisplay/TextDisplay';
 import Keyboard from './TextDisplay/KeyboardDisplay';
 import Results from './TextDisplay/Results';
+import { submitTest } from '../../redux/actions/testActions';
+import { fetchLessons } from '../../redux/actions/lessonActions';
+import GuestModal from '../Auth/GuestModal';
+import { RootState } from '../../redux/reducers';
 
-interface Props {
-  currentUser: currentUser | null;
-  token: string | null;
+interface TestProps {
+  submitTest: (payload: any) => void;
+  fetchLessons: (char: string) => Lesson;
+  lesson: Lesson;
 }
-interface mistakeIdxs {
-  char: string;
-  idx: number;
-}
-type timeDuration = 15 | 30 | 60;
-const Test: FC<Props> = ({ currentUser, token }) => {
+
+const Test: FC<TestProps> = ({ submitTest, fetchLessons, lesson }) => {
   const [words, setWords] = useState<string>('');
   const [index, setIndex] = useState<number>(0);
   const [mistakes, setMistakes] = useState<mistakeIdxs[]>([]);
   const [userKey, setUserKey] = useState<string | null>('');
   const [load, setLoad] = useState<Boolean>(false);
-  const [time, setTime] = useState<number>(60);
-  const [started, setStarted] = useState<Boolean>(false);
+  const [time, setTime] = useState<number>(90);
+  const [started, setStarted] = useState<boolean>(false);
   const [newTest, setNewTest] = useState<boolean>(false);
   const [seeResults, setSeeResults] = useState<boolean>(false);
   const [suggestionUrl, setSuggestionUrl] = useState<string>('');
   const [wpm, setWpm] = useState<number>(0);
   const [timeDuration, setTimeDuration] = useState<timeDuration>(60);
   let [results, setResults] = useState<results | undefined>();
+
+  const [intervalWordData, setIntervalWordData] = useState<intervalWordData[]>([]);
+  const [prevIndex, setPrevIndex] = useState<number>(0);
+  const [prevMistakes, setPrevMistakes] = useState<number>(0);
 
   const timeDurations: timeDuration[] = [15, 30, 60];
   let { id } = useParams();
@@ -43,19 +48,14 @@ const Test: FC<Props> = ({ currentUser, token }) => {
 
   const handleSubmit = async (mistakes: mistakeIdxs[]) => {
     try {
-      let findWPM: number =
-        index === 0
-          ? 0
-          : words.substring(0, index).split(' ').length * (60 / timeDuration);
-
       // frequency counter mistakes
       let count: any = {};
       mistakes?.forEach((idx) => {
-        count[idx.char] = (count[idx.char] || 0) + 1;
+        count[idx.expectedChar] = (count[idx.expectedChar] || 0) + 1;
       });
 
       // formatting into array
-      let container = [];
+      let container: { char: string; amount: number }[] = [];
       for (const [key, value] of Object.entries<number>(count)) {
         let newEntry = {
           char: key === ' ' ? 'space' : key,
@@ -65,37 +65,38 @@ const Test: FC<Props> = ({ currentUser, token }) => {
       }
 
       // calculate total mistakes
-      let mistakeAmount =
-        container.length > 0
-          ? container
-              ?.map((mistake) => mistake.amount)
-              ?.reduce((prev, next) => prev + next)
-          : 0;
+      let mistakeAmount = container.length > 0 ? container?.map((mistake) => mistake.amount)?.reduce((prev, next) => prev + next) : 0;
 
-      let calculatedAccuracy = parseFloat(
-        ((index / (index + mistakeAmount)) * 100).toFixed(2)
-      );
+      let calculatedAccuracy = parseFloat(((index / (index + mistakeAmount)) * 100).toFixed(2)) || 100;
 
+      let intervalData = intervalWordData;
+      if (intervalWordData.length < timeDuration / 5) {
+        const { timeFrame, wordsTyped, intervalAccuracy, intervalMistakes, charactersTyped } = intervalHelper();
+
+        intervalData = [
+          ...intervalWordData,
+          {
+            timeFrame,
+            wordsTyped,
+            charactersTyped,
+            mistakes: intervalMistakes,
+            accuracy: intervalAccuracy,
+          },
+        ];
+      }
       const payload: results = {
-        wpm: findWPM,
-        mistakes: container,
-        accuracy: calculatedAccuracy, // Use the calculated accuracy here
+        wpm,
+        accuracy: calculatedAccuracy,
+        text: words,
+        mistakes,
+        duration: timeDuration,
         totalChars: index,
-        _id: undefined,
+        intervalData,
+        lessonIds: [lesson.id],
       };
 
-      let token = localStorage.getItem('jwt');
+      await submitTest(payload);
 
-      const res = await axios.post(
-        `${process.env.REACT_APP_SERVER_URL}/tests`,
-        payload,
-        {
-          headers: {
-            Authorization: `${token}`,
-          },
-        }
-      );
-      payload._id = res.data.newTest._id as string;
       setResults(payload);
       setSeeResults(true);
 
@@ -117,38 +118,40 @@ const Test: FC<Props> = ({ currentUser, token }) => {
     }
   };
 
-  useEffect(() => {
-    const pingWords = async () => {
-      try {
-        if (id?.length === undefined) {
-          id = 'a'; // eslint-disable-line
-        } else {
-          if (id.length > 1) {
-            id = id[0];
-          }
-        }
-        // pinging api to get array of words and join them to string to present text
-        const response = await axios.get(
-          `https://api.datamuse.com/words?sp=${id}*`
-        );
-        const listWords = response.data.map(
-          (word: { word: string; score: number }) => {
-            return `${word.word}`;
-          }
-        );
-        const joined = listWords.join(' ');
-        setWords(joined);
-      } catch (err) {
-        console.log(err);
-      }
+  const intervalHelper = () => {
+    const intervalChars = index - prevIndex;
+    const intervalMistakes = mistakes.length - prevMistakes;
+    const intervalWordsTyped = words
+      .substring(prevIndex, index)
+      .split(' ')
+      .filter((word) => word !== '').length;
+    const intervalAccuracy = parseFloat(((intervalChars / (intervalChars + intervalMistakes)) * 100).toFixed(2));
+    return {
+      timeFrame: timeDuration - time,
+      wordsTyped: intervalWordsTyped,
+      charactersTyped: intervalChars,
+      intervalMistakes,
+      intervalAccuracy: intervalAccuracy || 100,
     };
-    pingWords();
+  };
+
+  useEffect(() => {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    const randomSuggestion = alphabet[Math.floor(Math.random() * 26)];
+    !id || id.length === 0 ? fetchLessons(randomSuggestion) : fetchLessons(id);
+
+    const joinWords = lesson?.words?.reduce((acc, wordObj) => {
+      return acc + ' ' + wordObj.word.text;
+    }, '');
+
+    setWords(joinWords.slice(1, joinWords.length));
     setLoad(true);
-  }, []);
+  }, [id]); // eslint-disable-line
 
   useEffect(() => {
     // Function to handle keydown event
-    const handleKeyDown = (e:any) => {
+    const handleKeyDown = (e: any) => {
+      e.preventDefault();
       if (e.key === ' ') {
         setUserKey('space');
         document.getElementById('space')?.classList.add('bg-zinc-800');
@@ -157,9 +160,9 @@ const Test: FC<Props> = ({ currentUser, token }) => {
         document.getElementById(e.key)?.classList.add('bg-zinc-800');
       }
     };
-  
+
     // Function to handle keyup event
-    const handleKeyUp = (e:any) => {
+    const handleKeyUp = (e: any) => {
       if (e.key === ' ') {
         document.getElementById('space')?.classList.remove('bg-zinc-800');
       } else {
@@ -167,33 +170,31 @@ const Test: FC<Props> = ({ currentUser, token }) => {
       }
       setUserKey(null);
     };
-  
+
     // Check if we should add event listeners
     if (load && started) {
       document.addEventListener('keydown', handleKeyDown);
       document.addEventListener('keyup', handleKeyUp);
     }
-  
+
     // Cleanup function to help avoid memory leaks
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
     };
   }, [load, started]); // Dependencies
-  
 
   useEffect(() => {
     if (userKey != null && started && !newTest) {
       // checking if user typed in correct char
-      if (
-        words[index] === userKey ||
-        (words[index] === ' ' && userKey === 'space')
-      ) {
+      if (words[index] === userKey || (words[index] === ' ' && userKey === 'space')) {
         // if the next index is the same as the current (ex: 'cc' ) the userKey isn't updated so changing the load calls the useEffect because of it's dependency and allows the reset to happen
         if (userKey === 'space') {
-          let newWpm = wpm + 1;
+          let newWpm = index === 0 ? 0 : words.substring(0, index).split(' ').length * (60 / timeDuration);
           setWpm(newWpm);
+          //
         }
+
         if (words[index + 1] === words[index]) {
           setLoad(false);
           setLoad(true);
@@ -205,10 +206,9 @@ const Test: FC<Props> = ({ currentUser, token }) => {
         if (userKey.length > 0) {
           const lastMistake = mistakes[mistakes.length - 1];
           if (lastMistake) {
-            if (lastMistake.idx !== index)
-              setMistakes([...mistakes, { char: words[index], idx: index }]);
+            if (lastMistake.idx !== index) setMistakes([...mistakes, { expectedChar: words[index], typedChar: userKey, idx: index }]);
           } else {
-            setMistakes([...mistakes, { char: words[index], idx: index }]);
+            setMistakes([...mistakes, { expectedChar: words[index], typedChar: userKey, idx: index }]);
           }
         }
       }
@@ -219,10 +219,26 @@ const Test: FC<Props> = ({ currentUser, token }) => {
     if (started) {
       // game timer that starts ticking as soon as the start button is clicked and ends test
       const seconds = setInterval(() => {
+        if (time % 5 === 0 && time !== timeDuration && intervalWordData.length < timeDuration / 5) {
+          const { timeFrame, wordsTyped, intervalAccuracy, intervalMistakes, charactersTyped } = intervalHelper();
+          setIntervalWordData((prevData) => [
+            ...prevData,
+            {
+              timeFrame,
+              wordsTyped,
+              charactersTyped,
+              mistakes: intervalMistakes,
+              accuracy: intervalAccuracy,
+            },
+          ]);
+          setPrevIndex(index);
+          setPrevMistakes(mistakes.length);
+        }
+
         if (time === 0) {
-          handleSubmit(mistakes);
           clearInterval(seconds);
-          return time;
+          handleSubmit(mistakes);
+          return;
         }
         setTime((prev) => prev - 1);
       }, 1000);
@@ -234,19 +250,16 @@ const Test: FC<Props> = ({ currentUser, token }) => {
 
   return (
     <div>
-      <TypingTestHeader time={time} wpm={wpm} testedChar={words[0]} />
-      {/* <Results /> */}
+      <Header time={time} wpm={wpm} testedChar={words[0]} test={true} />
       <br></br>
-
       <div className='relative'>
+        <GuestModal />
         <div className='flex items-center relative mx-auto'>
           <p className='ml-10'>Set Test Duration:</p>
           {timeDurations.map((val) => (
             <div key={val} className='m-4'>
               <p
-                className={`cursor-pointer ${
-                  timeDuration === val ? 'underline' : ''
-                }`}
+                className={`cursor-pointer ${timeDuration === val ? 'underline' : ''}`}
                 onClick={
                   !started
                     ? () => {
@@ -262,28 +275,27 @@ const Test: FC<Props> = ({ currentUser, token }) => {
           ))}
         </div>
 
-        <TextDisplay
-          words={words}
-          currIdx={index}
-          mistakes={mistakes}
-          started={started}
-          setStarted={() => setStarted(true)}
-          newTest={newTest}
-          setNewTest={handleNewTest}
-        />
+        <TextDisplay words={words} currIdx={index} mistakes={mistakes} started={started} setStarted={() => setStarted(true)} newTest={newTest} setNewTest={handleNewTest} />
       </div>
 
       {!newTest && <Keyboard />}
 
-      {seeResults && (
-        <Results
-          index={index}
-          results={results}
-          timeDuration={timeDuration}
-          currentUser={currentUser}
-        />
-      )}
+      {seeResults && <Results index={index} results={results} timeDuration={timeDuration} />}
     </div>
   );
 };
-export default Test;
+
+const mapStateToProps = (state: RootState) => {
+  return {
+    lesson: state.lessons.lesson,
+    loading: state.lessons.loading,
+    error: state.lessons.error,
+  };
+};
+
+const mapDispatchToProps = (dispatch: any) => ({
+  submitTest: (payload: any) => dispatch(submitTest(payload)),
+  fetchLessons: (char: string) => dispatch(fetchLessons(char)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Test);

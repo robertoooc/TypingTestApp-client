@@ -19,9 +19,7 @@ interface Accumulator {
 
 export const getAllTests = async () => {
   try {
-    const response = await axios.get(
-      `${process.env.REACT_APP_SERVER_URL}/tests/all`
-    );
+    const response = await axios.get(`${process.env.REACT_APP_SERVER_URL}/tests/all`);
     const testsByUser = response.data;
     return testsByUser;
   } catch (err) {
@@ -31,9 +29,7 @@ export const getAllTests = async () => {
 
 export const getAllTestsSorted = async () => {
   try {
-    const response = await axios.get(
-      `${process.env.REACT_APP_SERVER_URL}/tests/all`
-    );
+    const response = await axios.get(`${process.env.REACT_APP_SERVER_URL}/tests/all`);
     // grouping up the tests by user's id, undefined users count as new users anonymously
     const testsByUser = response.data.reduce((acc: Accumulator, test: Test) => {
       const userId = test.user?._id || uuidv4();
