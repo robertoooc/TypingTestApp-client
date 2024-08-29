@@ -8,7 +8,7 @@ export interface currentUser {
   googleOAuth: boolean;
   tests: test[];
   guest: boolean;
-  progress?: UserProgress;
+  progress?: userProgress;
   leaderboardEntries?: any;
 }
 
@@ -26,6 +26,7 @@ export interface test {
   user: currentUser;
   intervalData: intervalWordData[];
   leaderboardEntries?: any;
+  lessons?: Lesson[];
   createdAt: Date;
 }
 
@@ -139,14 +140,14 @@ export interface UserList {
   email?: string;
   profilePic?: string;
   wpm: number;
-  progress: UserProgress;
+  progress: userProgress;
 }
 
-export interface UserProgress {
+export interface userProgress {
   id: string;
   userId: string;
   totalTests: number;
-  averageWpm: number;
+  averageWPM: number;
   WPM: number;
   topWPMInterval: number;
   averageAccuracy: number;
@@ -184,5 +185,140 @@ export interface userProfile {
   bio: string | null;
   wpm: number;
   tests: test[];
-  progress: UserProgress;
+  progress: userProgress;
+}
+
+export interface lessonProgress {
+  averageAccuracy: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  averageCharsTyped: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  averageWPM: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  highestAccuracy: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  highestCharsTyped: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  highestWPM: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  timeSpent: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  totalCharsTyped: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  totalMistakes: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  totalTests: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  totalWordsTyped: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  updatedAt: Date;
+  createdAt: Date;
+  userId: string;
+}
+
+export interface Mistake {
+  id: string;
+  testId: string;
+  idx: number;
+  typedChar: string;
+  expectedChar: string;
+}
+
+export interface TypingTestData {
+  lessonProgress: lessonProgress[];
+  test: test;
+  userProgress: userProgressImprovements;
+}
+
+export interface userProgressImprovements {
+  id: string;
+  userId: string;
+  totalTests: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  averageWPM: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  WPM: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  topWPMInterval: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  averageAccuracy: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  topAccuracy: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  averageCharactersTyped: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  totalCharactersTyped: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  totalWordsTyped: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  totalMistakes: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
+  totalDuration: {
+    improvement: boolean;
+    value: number;
+    prevValue: number;
+  };
 }

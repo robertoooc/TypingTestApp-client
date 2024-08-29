@@ -1,9 +1,8 @@
 import React from 'react';
 
 const Keyboard: React.FC = () => {
-  // Simplified rendering logic for demonstration
   return (
-    <div className='w-8/12 min-h-min mx-auto grid grid-col-4 gap-1'>
+    <div className='w-8/12 min-h-min mx-auto grid grid-col-4 gap-1 my-5'>
       <br></br>
       <div className='grid gap-1 grid-cols-10'>
         <span className='border-2 border-black dark:border-body rounded-lg text-center' id='q'>

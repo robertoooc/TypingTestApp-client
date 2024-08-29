@@ -1,63 +1,43 @@
-import { TEST_REQUEST, TEST_SUCCESS, TEST_FAILURE } from '../actionTypes';
-import { TestState } from '../../types/types';
+import { TEST_REQUEST, TEST_SUCCESS, TEST_FAILURE, RESET_TEST_STATE } from '../actionTypes';
+import { TypingTestData } from '../../types/types';
 
-const userInitialState = {
-  id: '',
-  name: '',
-  wpm: 0,
-  googleOAuth: false,
-  tests: [],
-  guest: false
-};
-
-const initialState: TestState = {
-  wpm: 0,
-  accuracy: 0,
-  user: userInitialState,
-  duration: 60,
-  text: '',
-  totalChars: 0,
-  mistakes: [],
-  intervalData: [],
+const initialState: {
+  data: TypingTestData | null;
+  error: string | null;
+  loading: boolean;
+} = {
+  data: null,
+  error: null,
   loading: false,
-  error: null
 };
 
-export const testReducer = (state = initialState, action: any): TestState => {
+export const testReducer = (state = initialState, action: any) => {
   switch (action.type) {
+    case RESET_TEST_STATE:
+      return {
+        ...initialState,
+      };
     case TEST_REQUEST:
       return {
         ...state,
         loading: true,
-        error: null
+        error: null,
       };
     case TEST_SUCCESS:
       return {
-        ...state,
+        data: {
+          lessonProgress: action.payload.lessonProgress,
+          test: action.payload.test,
+          userProgress: action.payload.userProgress,
+        },
         loading: false,
-        wpm: action.payload.wpm,
-        accuracy: action.payload.accuracy,
-        user: action.payload.user,
-        text: action.payload.text,
-        totalChars: action.payload.totalChars,
-        mistakes: action.payload.mistakes,
-        duration: action.payload.duration,
-        intervalData: action.payload.intervalData,
-        error: null
+        error: null,
       };
     case TEST_FAILURE:
       return {
-        ...state,
+        data: null,
         loading: false,
-        wpm: 0,
-        accuracy: 0,
-        user: userInitialState,
-        text: '',
-        totalChars: 0,
-        mistakes: [],
-        duration: 60,
-        intervalData: [],
-        error: action.payload
+        error: action.payload,
       };
     default:
       return state;

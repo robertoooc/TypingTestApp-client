@@ -97,7 +97,7 @@ const TextDisplay: FC<Props> = ({ words, currIdx, mistakes, started, setStarted,
 
   return (
     <div className='relative'>
-      <div className='bg-neutral-300 w-7/12 mx-auto rounded-xl p-2 relative dark:text-black overflow-hidden'>
+      <div className='bg-neutral-300 w-fit mx-auto rounded-xl p-2 relative dark:text-black overflow-hidden'>
         {!started && (
           <div className='absolute inset-0 flex justify-center items-center backdrop-filter backdrop-brightness-50 rounded-lg'>
             <button onClick={setStarted} className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center'>
@@ -107,7 +107,7 @@ const TextDisplay: FC<Props> = ({ words, currIdx, mistakes, started, setStarted,
         )}
         {newTest && (
           <div className='absolute inset-0 flex justify-center items-center backdrop-filter backdrop-brightness-50 rounded-lg'>
-            <button onClick={setNewTest} className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center'>
+            <button onClick={setNewTest} className='text-white bg-[#24292F] font-medium rounded-lg text-sm px-5 py-2.5 text-center '>
               New Test
             </button>
           </div>
@@ -126,7 +126,7 @@ const TextDisplay: FC<Props> = ({ words, currIdx, mistakes, started, setStarted,
                 if (isError && !isCurrent) {
                   className += ' bg-red-600'; // Background color for errors
                 } else if (isTyped && !isError) {
-                  className += ' bg-gray-200'; // Background color for already typed text
+                  className += ' opacity-50'; // Background color for already typed text
                 } else if (isCurrent) {
                   className += ' bg-yellow-300'; // Background color for current typing position
                 }

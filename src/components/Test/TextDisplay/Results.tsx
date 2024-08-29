@@ -1,59 +1,59 @@
-import { FC } from 'react';
-import { results } from '../../../types/types';
+import { FC, useState } from 'react';
+import { connect } from 'react-redux';
+import { TypingTestData } from '../../../types/types';
+import LessonProgress from './Results/LessonProgress';
+import TestResults from './Results/TestResults';
+import UserProgress from './Results/UserProgress';
 
 interface props {
-  index: number;
-  results: results | undefined;
-  timeDuration: number;
+  data: TypingTestData;
 }
-const Results: FC<props> = ({ index, results, timeDuration }) => {
+
+const Results: FC<props> = ({ data }) => {
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const titles = ['Test Results', 'Lesson Progress', 'User Progress'];
+  const { lessonProgress, test, userProgress } = data;
+
   return (
-    <div className='max-w-xl mx-auto bg-gray-100 rounded-lg shadow-lg p-6'>
-      <div className='text-center mb-6'>
-        <h2 className='text-3xl font-semibold text-gray-800'>Test Results</h2>
-        <p className='text-gray-600'>Total Characters Typed: {index}</p>
+    <div className='w-3/4 mx-auto rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark'>
+      <div className='text-center mb-3'>
+        <h2 className='text-3xl font-semibold text-gray-800'>Results</h2>
       </div>
-      <div className='flex justify-between mb-6'>
-        <div className='text-center'>
-          <p className='text-lg font-semibold text-gray-800'>Accuracy</p>
-          <p className='text-gray-600'>{results?.accuracy}%</p>
-        </div>
-        <div className='text-center'>
-          <p className='text-lg font-semibold text-gray-800'>WPM</p>
-          <p className='text-gray-600'>{results?.wpm || 0}</p>
-        </div>
-        <div className='text-center'>
-          <p className='text-lg font-semibold text-gray-800'>Mistakes</p>
-          <p className='text-gray-600'>
-            {/* {!results?.mistakes || results.mistakes.length === 0
-              ? '0'
-              : results?.mistakes
-                  ?.map((a) => a.amount)
-                  ?.reduce((a, b) => a + b)} */}
-          </p>
-        </div>
-        <div className='text-center'>
-          <p className='text-lg font-semibold text-gray-800'>Test Duration</p>
-          <p className='text-gray-600'>{timeDuration} seconds</p>
-        </div>
+      <div className='mb-6 flex justify-center gap-10 border-b border-stroke dark:border-strokedark'>
+        {titles.map((title, idx) => (
+          <div
+            key={idx}
+            className={`border-b-2 py-4 text-sm font-medium md:text-base ${activeTab === idx ? 'border-primary text-primary' : 'border-transparent hover:text-primary'}`}
+            onClick={() => setActiveTab(idx)}
+            style={{ cursor: 'pointer' }}
+          >
+            {title}
+          </div>
+        ))}
       </div>
-      <h3 className='text-xl font-semibold text-gray-800 mb-4'>Mistakes Made</h3>
-      <div className='max-h-40 overflow-y-auto'>
-        <div className='space-y-4'>
-          {/* {results?.mistakes
-            .sort((a, b) => b.amount - a.amount)
-            .map((mistake, idx) => (
-              <div
-                key={idx}
-                className='flex justify-between items-center bg-gray-200 rounded-lg p-2'
-              >
-                <p className='font-semibold'>{mistake.char}</p>
-                <p className='text-gray-600'>Amount: {mistake.amount}</p>
-              </div>
-            ))} */}
-        </div>
+      <div>
+        {activeTab === 0 && (
+          <div className='leading-relaxed'>
+            <TestResults testData={test} />
+          </div>
+        )}
+        {activeTab === 1 && (
+          <div className='leading-relaxed'>
+            <LessonProgress lessonProgress={lessonProgress} />
+          </div>
+        )}
+        {activeTab === 2 && (
+          <div className='leading-relaxed'>
+            <UserProgress userProgress={userProgress} />
+          </div>
+        )}
       </div>
     </div>
   );
 };
-export default Results;
+
+const mapStateToProps = (state: any) => ({
+  data: state.test.data,
+});
+
+export default connect(mapStateToProps)(Results);

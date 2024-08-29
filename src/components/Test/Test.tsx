@@ -6,7 +6,7 @@ import Header from '../Header';
 import TextDisplay from './TextDisplay/TextDisplay';
 import Keyboard from './TextDisplay/KeyboardDisplay';
 import Results from './TextDisplay/Results';
-import { submitTest } from '../../redux/actions/testActions';
+import { submitTest, resetTestState } from '../../redux/actions/testActions';
 import { fetchLessons } from '../../redux/actions/lessonActions';
 import GuestModal from '../Auth/GuestModal';
 import { RootState } from '../../redux/reducers';
@@ -14,16 +14,18 @@ import { RootState } from '../../redux/reducers';
 interface TestProps {
   submitTest: (payload: any) => void;
   fetchLessons: (char: string) => Lesson;
+  resetTestState: () => void;
   lesson: Lesson;
+  test: any;
 }
 
-const Test: FC<TestProps> = ({ submitTest, fetchLessons, lesson }) => {
+const Test: FC<TestProps> = ({ submitTest, fetchLessons, lesson, test, resetTestState }) => {
   const [words, setWords] = useState<string>('');
   const [index, setIndex] = useState<number>(0);
   const [mistakes, setMistakes] = useState<mistakeIdxs[]>([]);
   const [userKey, setUserKey] = useState<string | null>('');
   const [load, setLoad] = useState<Boolean>(false);
-  const [time, setTime] = useState<number>(90);
+  const [time, setTime] = useState<number>(60);
   const [started, setStarted] = useState<boolean>(false);
   const [newTest, setNewTest] = useState<boolean>(false);
   const [seeResults, setSeeResults] = useState<boolean>(false);
@@ -42,6 +44,7 @@ const Test: FC<TestProps> = ({ submitTest, fetchLessons, lesson }) => {
 
   const handleNewTest = () => {
     // resetting the url based on suggested from test results then refreshes
+    resetTestState();
     navigate(suggestionUrl);
     navigate(0);
   };
@@ -275,18 +278,29 @@ const Test: FC<TestProps> = ({ submitTest, fetchLessons, lesson }) => {
           ))}
         </div>
 
-        <TextDisplay words={words} currIdx={index} mistakes={mistakes} started={started} setStarted={() => setStarted(true)} newTest={newTest} setNewTest={handleNewTest} />
+        <TextDisplay
+          words={words}
+          currIdx={index}
+          mistakes={mistakes}
+          started={started}
+          setStarted={() => {
+            resetTestState();
+            setStarted(true);
+          }}
+          newTest={newTest}
+          setNewTest={handleNewTest}
+        />
       </div>
-
-      {!newTest && <Keyboard />}
-
-      {seeResults && <Results index={index} results={results} timeDuration={timeDuration} />}
+      {/* {!newTest && <Keyboard />} */}
+      {newTest && <Results />}
+      {/* <Results/> */}
     </div>
   );
 };
 
 const mapStateToProps = (state: RootState) => {
   return {
+    test: state.test.data,
     lesson: state.lessons.lesson,
     loading: state.lessons.loading,
     error: state.lessons.error,
@@ -296,6 +310,7 @@ const mapStateToProps = (state: RootState) => {
 const mapDispatchToProps = (dispatch: any) => ({
   submitTest: (payload: any) => dispatch(submitTest(payload)),
   fetchLessons: (char: string) => dispatch(fetchLessons(char)),
+  resetTestState: () => dispatch(resetTestState()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Test);
